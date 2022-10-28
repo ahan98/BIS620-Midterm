@@ -1,0 +1,32 @@
+---
+title: "BIS 620 2022 Midterm"
+format: pdf
+---
+
+For your midterm, you will extend the web application we have been developing in class. It is due by the end of the day on November 1st.
+
+- You may work alone or in teams of up to 3
+- You may assume that the database we created in class is available, is named "ctrialsgov.duckdb" and can be found in "../ctrialsgovdb", relative to the app.R file. 
+- If needed, you may assume that the database needed by the `ctrialsgov` package is available in "../ctrialsgovdb" and is called "ctgov-derived.duckdb".
+- Please do not upload your own database.
+
+# Grading criteria
+
+- Do the features you added do what they are supposed to?
+- Does the application remain responsive?
+- Is the code documented?
+- Are visualizations easy to understand and interpret?
+- Has your code been tested?
+- Is your code useful beyond the web application?
+- For the features you are proposing:
+    - Have you described what will do?
+    - Have you described why someone might want to use the feature?
+    - Is the new feature intuitive to use in the app? 
+    - What is the useful information being provided and how might that information be used?
+
+# Problems
+
+1. Fix the phase histogram so that the x-axis values are uniform regardless of the query.
+2. Add a new tab that gives a histogram showing the conditions that trials in a query are examining.
+3. Add a drop-down so that queries can be subsetted on sponsor type
+4. Each team member will propose, implement, test, design, and integrate three features. Each feature needs a motivation, description, implementation, documentation, testing, and integration into the app. You may include a separate document with motivation, description, and use of the features both directly as a function call and through the app.
