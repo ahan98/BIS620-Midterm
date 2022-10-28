@@ -37,8 +37,9 @@ if (!exists("con")) {
   # Creating Connection
   con = dbConnect(
     duckdb(
-      file.path("..", "..", "ctrialsgovdb", "ctrialsgov.duckdb"),  # For Nokkvi
+      #file.path("..", "..", "ctrialsgovdb", "ctrialsgov.duckdb"),  # For Nokkvi
       #file.path(getwd(), "ctrialsgovdb", "ctrialsgov.duckdb"), # For Elisa
+      file.path("..", "ctrialsgov.duckdb"), # For Alex
       read_only = TRUE
     )
   )
