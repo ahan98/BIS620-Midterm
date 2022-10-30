@@ -1,5 +1,7 @@
-source('vars.R', local = TRUE) # For Elisa
-source('utils.R', local = TRUE) # For Elisa
+# source('vars.R', local = TRUE) # For Elisa
+# source('utils.R', local = TRUE) # For Elisa
+source('~/Desktop/ctquery5/utils.R', local = TRUE) # For Alex
+source('~/Desktop/ctquery5/vars.R', local = TRUE) # For Alex
 library(shinydashboard) # For Elisa
 
 # 1. Header --------------------------------------------------------------------

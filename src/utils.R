@@ -131,7 +131,7 @@ plot_condition_bar_plot = function(d) {
   ggplot(z, aes(x = study_type, y = n)) +
     geom_col() +
     theme_bw() +
-    xlab("Phase") +
+    xlab("Conditions") +
     ylab("Count")
 }
 
@@ -150,6 +150,10 @@ plot_wordcloud <- function(d) {
     collect() %>% 
     arrange(-n)
   
+  print(d %>% select(brief_title) %>% nrow())
+  print(d %>% collect() %>% select(brief_title) %>% nrow())
+  print("---")
+  
   n <- nrow(text)
   if (n > 50) {
     w <- text$acronym[1:50]
@@ -166,21 +170,23 @@ plot_wordcloud <- function(d) {
               min.freq = n, max.words=n,
               colors=brewer.pal(8, "Dark2"))
   } else {
+    print("----")
+    msg <- paste0("Sorry, no acronym available. Try ", closest_word(rv$si))
     grid <- expand.grid(1:5, 3:1)
     ggplot(grid) +
-      geom_text(aes(1, 1, label = 'Sorry, No acronym available'), size = 5.5) +
-      theme_bw() + 
-      theme(panel.border = element_blank(), 
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(), 
-            axis.ticks.y = element_blank(),
-            axis.ticks.x = element_blank(),
-            axis.text.y = element_blank(),
-            axis.text.x = element_blank(),
-            axis.title.x=element_blank(),
-            axis.title.y=element_blank())
+      geom_text(aes(1, 1, label = msg), size = 5.5) +
+      blankTheme()
   }
 }
+
+#' @description Get the (case-insensitive) closest word from `word_list`
+#' based on Levenshtein edit distance
+#' @param word the queried word
+#' @return the closest word
+closest_word <- function(word) {
+  return( word_list[which.min(adist(word, word_list_lc))] )
+}
+
 
 #' @description Create a world map of country location by distinct `nct_id`
 #' @param d the database table.

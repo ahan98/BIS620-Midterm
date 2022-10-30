@@ -29,17 +29,19 @@ library(lubridate)
 library(wordcloud)
 library(mapproj)
 library(shinydashboard)
+library(tidyr)
 
 ################################################################################
 ############################ Connection to DB ##################################
 # Create the connection to a database and "studies" and "sponsors" tables.
 if (!exists("con")) {
+  setwd("~")  # For Alex
   # Creating Connection
   con = dbConnect(
     duckdb(
-      #file.path("..", "..", "ctrialsgovdb", "ctrialsgov.duckdb"),  # For Nokkvi
+      # file.path("..", "..", "ctrialsgovdb", "ctrialsgov.duckdb"),  # For Nokkvi
       #file.path(getwd(), "ctrialsgovdb", "ctrialsgov.duckdb"), # For Elisa
-      file.path("..", "ctrialsgov.duckdb"), # For Alex
+      file.path(getwd(), "Desktop", "clinical-trials", "ctrialsgov.duckdb"),
       read_only = TRUE
     )
   )
@@ -88,6 +90,20 @@ all_sponsors <- dt |>
   mutate(agency_class = replace(agency_class, is.na(agency_class), 'NA')) |>
   arrange(agency_class)
 
+# list of tokens (space-separated) in brief_title column
+# due to complexity, tokenize 1000 random rows instead of all data
+word_list <- dt |>
+  select(brief_title) |>
+  collect() |>
+  drop_na() |>
+  # head(5) |>
+  sample_n(1000, replace = FALSE) |> # takes ~30 secs on all rows
+  lapply(function(x) strsplit(x, split = "[ ,()\"\n]+")) |>
+  unlist() |>
+  unique()
+
+# lowercase tokens (see closest_word() function in utils.R)
+word_list_lc <- tolower(word_list)
 
 ################################################################################
 ######################## World map data wrangling ##############################
@@ -141,6 +157,23 @@ countryData <- dt %>%
   group_by(name) %>% 
   summarize(n = n()) %>% 
   collect() 
+
+################################################################################
+######################## Empty theme for error plots ###########################
+
+blankTheme <- function(){
+  theme_bw() + 
+    theme(panel.border = element_blank(), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(), 
+          axis.ticks.y = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.text.x = element_blank(),
+          axis.title.x=element_blank(),
+          axis.title.y=element_blank())
+}
+  
 
 ################################################################################
 ############################ The landing page ##################################

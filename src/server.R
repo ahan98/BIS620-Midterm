@@ -1,5 +1,9 @@
-source('vars.R', local = TRUE) # For Elisa
-source('utils.R', local = TRUE) # For Elisa
+# source('vars.R', local = TRUE) # For Elisa
+source('~/Desktop/ctquery5/utils.R', local = TRUE) # For Alex
+source('~/Desktop/ctquery5/vars.R', local = TRUE) # For Alex
+
+rv <- reactiveValues()
+rv$si <- NULL
 
 
 # Define server
@@ -72,6 +76,8 @@ server <- function(input, output) {
         strsplit(",") |>
         unlist() |>
         trimws()
+      
+      rv$si <- si
       ret = query_kwds(data2, si, "brief_title", match_all = TRUE)
     } else {
       ret = data2
