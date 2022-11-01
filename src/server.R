@@ -1,10 +1,13 @@
+# source('utils.R', local = TRUE) # For Elisa
 # source('vars.R', local = TRUE) # For Elisa
-source('~/Desktop/ctquery5/utils.R', local = TRUE) # For Alex
-source('~/Desktop/ctquery5/vars.R', local = TRUE) # For Alex
+source('~/Desktop/ctquery8/utils.R', local = TRUE) # For Alex
+source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
 
 rv <- reactiveValues()
 rv$si <- NULL
-
+rv$currentPlotData <- NULL
+rv$minDate <- NULL
+rv$maxDate <- NULL
 
 # Define server
 server <- function(input, output) {
@@ -15,7 +18,8 @@ server <- function(input, output) {
   
   ## Value Boxes
   output$Box01 <- vb_render(N, 'export', 'Entries in Data Base', '', 'green')
-  output$Box02 <- vb_render(R, 'import', 'Number of Columns', '', 'blue')
+  output$Box02 <- vb_render(R, 'import', 'Number of Variables', '', 'blue')
+  output$Box03 <- vb_render(R*N, 'import', 'Number of Data Points', '', 'purple')
   
   ## Plots
   output$world_static <- renderPlot({
@@ -27,16 +31,7 @@ server <- function(input, output) {
       scale_y_continuous(limits=c(-55,120)) + 
       scale_fill_continuous(low = '#008CA3', high = '#BA0B13') +
       labs(fill = "Count") + 
-      theme(panel.border = element_blank(), 
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(), 
-            axis.ticks.y = element_blank(),
-            axis.ticks.x = element_blank(),
-            axis.text.y = element_blank(),
-            axis.text.x = element_blank(),
-            axis.title.x=element_blank(),
-            axis.title.y=element_blank(),
-            panel.background = element_blank())
+      blankTheme()
   })
   
   ## Tables 
@@ -54,7 +49,6 @@ server <- function(input, output) {
   # Data Explore Page ----------------------------------------------------------
   ## Images
   output$aact <- renderText({ add_image(logo_aact, "25%") })
-
   
   ## Subsetting Data
   get_studies = reactive({
@@ -83,6 +77,10 @@ server <- function(input, output) {
       ret = data2
     }
     
+    # rv$minDate <- ret %>% pull(start_date) %>% na.omit() %>% min()
+    # rv$maxDate <- ret %>% pull(completion_date) %>% na.omit() %>% max()
+    # print(paste(rv$minDate, rv$maxDate))
+    
     # Final data
     ret |>
       collect()
@@ -96,7 +94,6 @@ server <- function(input, output) {
       collect()
   })
   
-  
   ## Value Boxes
   output$Box11 <- vb_render(N, 'export', 'Entries in Data Base', '', 'green')
   observe({
@@ -109,7 +106,26 @@ server <- function(input, output) {
     # Value box for percent of rows shown of the subset data
     shown <- nrow(get_studies_table() %>% collect())
     perc <- round(100*(shown/subset), 2)
+    perc <- ifelse(is.infinite(perc), 0, perc)
     output$Box13 <- vb_render(perc, 'check', 'Proportion in Table & Histogram', '%', 'orange')
+  })
+  
+  output$trial_table <- renderDT({
+    DT::datatable(get_studies_table() |> 
+                    select(nct_id, brief_title, start_date, completion_date, 
+                           phase, study_type, acronym, name) |>
+                    rename(`NCT ID` = nct_id, `Brief Title` = brief_title,
+                           `Start Date` = start_date, 
+                           `Completion Date` = completion_date, `Phase` = phase, 
+                           `Condition` = study_type, `Acronym` = acronym, 
+                           `Country` = name), 
+                  options = list(scrollX = TRUE))
+  })
+  
+  output$features_table <- renderDT({
+    DT::datatable(
+      get_studies() |> select(input$features) |> head(1000)
+    )
   })
   
   ## Plots in tabs -------------------------------------------------------------
@@ -124,11 +140,7 @@ server <- function(input, output) {
     get_studies_table() |>
       select(start_date, completion_date) |>
       get_concurrent_trials() |>
-      ggplot(aes(x = date, y = count)) +
-      geom_line() +
-      xlab("Date") +
-      ylab("Count") + 
-      theme_bw()
+      plot_concurrent()
   })
   
   # Condition bar plot
@@ -152,17 +164,35 @@ server <- function(input, output) {
   
   ## Tables
   # Data table with updated names
-  output$trial_table = renderDataTable({
-    get_studies_table() |> 
-      select(nct_id, brief_title, start_date, completion_date, name) |>
-      rename(`NCT ID` = nct_id, `Brief Title` = brief_title,
-             `Start Date` = start_date, `Completion Date` = completion_date,
-             `Country` = name)
+  output$trial_table <- renderDT({
+    DT::datatable(get_studies_table() |> 
+                    select(nct_id, brief_title, start_date, completion_date, 
+                           phase, study_type, acronym, name) |>
+                    rename(`NCT ID` = nct_id, `Brief Title` = brief_title,
+                           `Start Date` = start_date, 
+                           `Completion Date` = completion_date, `Phase` = phase, 
+                           `Condition` = study_type, `Acronym` = acronym, 
+                           `Country` = name), 
+                  options = list(scrollX = TRUE))
+  })
+  
+  # Data table with updated names
+  observeEvent(rv$currentPlotData,{
+    output$summary_table <- renderDT({
+      DT::datatable(rv$currentPlotData, options = list(scrollX = TRUE))
+    })
   })
   
   ## Data Explore Page has loaded
   removeUI(selector = '#main_wait_message' )
   
+  output$download <- downloadHandler(
+    filename = function(){"studies.csv"}, 
+    content = function(fname){
+      write.csv(get_studies(), fname)
+    }
+  )
+
   ##############################################################################
   # About Page -----------------------------------------------------------------
   output$sds <- renderText({ add_image(logo_sds, "10%") })

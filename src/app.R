@@ -17,4 +17,3 @@ source('server.R', local = TRUE)
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-

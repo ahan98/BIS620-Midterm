@@ -30,6 +30,7 @@ library(wordcloud)
 library(mapproj)
 library(shinydashboard)
 library(tidyr)
+library(DT)
 
 ################################################################################
 ############################ Connection to DB ##################################
@@ -40,7 +41,7 @@ if (!exists("con")) {
   con = dbConnect(
     duckdb(
       # file.path("..", "..", "ctrialsgovdb", "ctrialsgov.duckdb"),  # For Nokkvi
-      #file.path(getwd(), "ctrialsgovdb", "ctrialsgov.duckdb"), # For Elisa
+      # file.path(getwd(), "ctrialsgovdb", "ctrialsgov.duckdb"), # For Elisa
       file.path(getwd(), "Desktop", "clinical-trials", "ctrialsgov.duckdb"),
       read_only = TRUE
     )
@@ -68,10 +69,12 @@ if (!exists("con")) {
 ################################################################################
 ############################ Variables #########################################
 # Get number of rows
-N <- nrow(dt %>% collect())
+N <- nrow(collect(dt))
 
 # Get number of columns
-R <- dt %>% ncol()
+R <- ncol(dt)
+
+NAMES <- colnames(dt)
 
 # All phases in the complete data frame
 all_phases <- dt |>
@@ -157,23 +160,6 @@ countryData <- dt %>%
   group_by(name) %>% 
   summarize(n = n()) %>% 
   collect() 
-
-################################################################################
-######################## Empty theme for error plots ###########################
-
-blankTheme <- function(){
-  theme_bw() + 
-    theme(panel.border = element_blank(), 
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(), 
-          axis.ticks.y = element_blank(),
-          axis.ticks.x = element_blank(),
-          axis.text.y = element_blank(),
-          axis.text.x = element_blank(),
-          axis.title.x=element_blank(),
-          axis.title.y=element_blank())
-}
-  
 
 ################################################################################
 ############################ The landing page ##################################

@@ -1,7 +1,7 @@
 # source('vars.R', local = TRUE) # For Elisa
 # source('utils.R', local = TRUE) # For Elisa
-source('~/Desktop/ctquery5/utils.R', local = TRUE) # For Alex
-source('~/Desktop/ctquery5/vars.R', local = TRUE) # For Alex
+source('~/Desktop/ctquery8/utils.R', local = TRUE) # For Alex
+source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
 library(shinydashboard) # For Elisa
 
 # 1. Header --------------------------------------------------------------------
@@ -25,6 +25,7 @@ sidebar_main <-
       ## 2nd tab: Data Explore
       menuItem("Data Explore", tabName = 'report_tab', icon = icon('wrench')),
       report_sidediv(),
+      data_sidediv(),
       ## 3rd tab: About
       menuItem("About", tabName = 'help', icon = icon('question-circle'))
     )
@@ -44,7 +45,8 @@ body <- dashboardBody(
             # Value boxes for columns and rows
             fluidRow(
               valueBoxOutput("Box01"), 
-              valueBoxOutput("Box02")
+              valueBoxOutput("Box02"),
+              valueBoxOutput("Box03")
             ),
             # Non-reactive world map
             p(home_db),
@@ -82,8 +84,15 @@ body <- dashboardBody(
             ),
             # Data Table
             tags$hr(),
-            dataTableOutput("trial_table")
+            tabsetPanel(type = "tabs",
+                        tabPanel("View Subset Data", DTOutput("trial_table")),
+                        tabPanel("View Summarized Data", DTOutput("summary_table")),
+                        tabPanel("View Subset Features", DTOutput("features_table"))
+            )
     ),
+    
+    # tabItem(tabName = 'download_tab',
+    # ),
     
     # Page 3, About ------------------------------------------------------------
     tabItem(tabName = 'help',

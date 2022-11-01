@@ -1,6 +1,8 @@
 # This script hold utilities used for the shiny app. All utilities are created
 # here except for variables.
 
+source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
+
 #' @title Query keywords from a database table.
 #' @description Description goes here.
 #' @param d the database table.
@@ -66,12 +68,25 @@ plot_phase_bar_plot = function(d) {
   # Arrange by name
   z$phase <- factor(z$phase, levels=sort(unique(z$phase)))
   
-  # Create plot
-  ggplot(z, aes(x = phase, y = n)) +
-    geom_col() +
-    theme_bw() +
-    xlab("Phase") +
-    ylab("Count")
+  # Save summary data for table
+  rv$currentPlotData <- z |> select(phase, n) |> 
+    rename(`Phase` = phase, `Count` = n)
+  
+  if (sum(z$n) > 0) {
+    # Create plot
+    ggplot(z, aes(x = phase, y = n)) +
+      geom_col() +
+      theme_bw() +
+      xlab("Phase") +
+      ylab("Count")
+  } else {
+    #print("----")
+    msg <- paste0("Sorry, no phase available. Try ", closest_word(rv$si))
+    grid <- expand.grid(1:5, 3:1)
+    ggplot(grid) +
+      geom_text(aes(1, 1, label = msg), size = 5.5) +
+      blankTheme()
+  }
 }
 
 #' @description Get the number of concurrent trials for each date in a set of 
@@ -127,12 +142,24 @@ plot_condition_bar_plot = function(d) {
   # Arrange by name
   z$study_type <- factor(z$study_type, levels=sort(unique(z$study_type)))
   
-  # Create plot
-  ggplot(z, aes(x = study_type, y = n)) +
-    geom_col() +
-    theme_bw() +
-    xlab("Conditions") +
-    ylab("Count")
+  # Save summary data for table
+  rv$currentPlotData <- z |> select(study_type, n) |> 
+    rename(`Condition` = study_type, `Count` = n)
+  if (sum(z$n) > 0) {
+    # Create plot
+    ggplot(z, aes(x = study_type, y = n)) +
+      geom_col() +
+      theme_bw() +
+      xlab("Conditions") +
+      ylab("Count")
+  } else {
+    #print("----")
+    msg <- paste0("Sorry, no condition available. Try ", closest_word(rv$si))
+    grid <- expand.grid(1:5, 3:1)
+    ggplot(grid) +
+      geom_text(aes(1, 1, label = msg), size = 5.5) +
+      blankTheme()
+  }
 }
 
 #' @description Create a wordcloud of the acronyms returned by a brief title 
@@ -141,7 +168,7 @@ plot_condition_bar_plot = function(d) {
 #' @return a ggplot text word cloud of acronyms
 plot_wordcloud <- function(d) {
   set.seed(3)
-  #Create a vector containing only the text
+  # Create a vector containing only the text
   text <- d %>% 
     select(acronym) %>% 
     filter(!is.na(acronym)) %>% 
@@ -149,10 +176,6 @@ plot_wordcloud <- function(d) {
     summarize(n = n()) %>% 
     collect() %>% 
     arrange(-n)
-  
-  print(d %>% select(brief_title) %>% nrow())
-  print(d %>% collect() %>% select(brief_title) %>% nrow())
-  print("---")
   
   n <- nrow(text)
   if (n > 50) {
@@ -163,6 +186,10 @@ plot_wordcloud <- function(d) {
     f <- text$n[1:n]
   }
   
+  # Save summary data for table
+  rv$currentPlotData <- text |> select(acronym, n) |> 
+    rename(`Acronym` = acronym, `Count` = n)
+  
   if (n != 0) {
     wordcloud(words = w,
               freq = f, 
@@ -170,8 +197,29 @@ plot_wordcloud <- function(d) {
               min.freq = n, max.words=n,
               colors=brewer.pal(8, "Dark2"))
   } else {
-    print("----")
+    #print("----")
     msg <- paste0("Sorry, no acronym available. Try ", closest_word(rv$si))
+    grid <- expand.grid(1:5, 3:1)
+    ggplot(grid) +
+      geom_text(aes(1, 1, label = msg), size = 5.5) +
+      blankTheme()
+  }
+}
+
+#' @description Create a plot of concurrent trials
+#' @param d the database table.
+#' @return a ggplot showing the concurrent trials
+plot_concurrent <- function(d) {
+  
+  if (nrow(d) > 0) {
+    ggplot(d, aes(x = date, y = count)) +
+      geom_line() +
+      xlab("Date") +
+      ylab("Count") + 
+      theme_bw()
+  } else {
+    #print("----")
+    msg <- paste0("Sorry, no studies available. Try ", closest_word(rv$si))
     grid <- expand.grid(1:5, 3:1)
     ggplot(grid) +
       geom_text(aes(1, 1, label = msg), size = 5.5) +
@@ -192,11 +240,6 @@ closest_word <- function(word) {
 #' @param d the database table.
 #' @return a ggplot map plot filled by country counts
 plot_world <- function(d) {
-  # Print error message if not data available
-  validate(
-    need(dim(d)[1] != 0, "\n Error: No data to plot")
-  )
-  
   # Getting the data from data base
   countrySubset <- d %>% 
     distinct(nct_id, name) %>% 
@@ -212,25 +255,28 @@ plot_world <- function(d) {
   missingValues$n <- NA
   countrySubset <- rbind(countrySubset, missingValues)
   
+  # Save summary data for table
+  rv$currentPlotData <- countrySubset |> select(name, n) |> 
+    rename(`Country` = name, `Count` = n) 
   # Plot map
-  ggplot(data = countrySubset) + coord_map() + 
-    geom_map(aes(map_id = name, fill = n), map = world, 
-             color = "black", size = 0.2) +
-    expand_limits(x = world$long, y = world$lat) +
-    scale_fill_continuous(low = '#008CA3', high = '#BA0B13') +
-    scale_x_continuous(limits = c(-180,180)) + 
-    scale_y_continuous(limits = c(-55,120)) + 
-    labs(fill = "Count") +
-    theme(panel.border = element_blank(), 
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(), 
-          axis.ticks.y = element_blank(),
-          axis.ticks.x = element_blank(), 
-          axis.text.y = element_blank(),
-          axis.text.x = element_blank(), 
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank(), 
-          panel.background = element_blank())
+  if (sum(countrySubset$n, na.rm = TRUE) > 0) {
+    ggplot(data = countrySubset) + coord_map() + 
+      geom_map(aes(map_id = name, fill = n), map = world, 
+               color = "black", size = 0.2) +
+      expand_limits(x = world$long, y = world$lat) +
+      scale_fill_continuous(low = '#008CA3', high = '#BA0B13') +
+      scale_x_continuous(limits = c(-180,180)) + 
+      scale_y_continuous(limits = c(-55,120)) + 
+      labs(fill = "Count") +
+      blankTheme()
+  } else {
+    #print("----")
+    msg <- paste0("Sorry, no countries available. Try ", closest_word(rv$si))
+    grid <- expand.grid(1:5, 3:1)
+    ggplot(grid) +
+      geom_text(aes(1, 1, label = msg), size = 5.5) +
+      blankTheme()
+  }
 }
 
 #' @description Add a centered image to the shiny app
@@ -284,6 +330,18 @@ report_sidediv <- function() {
         textInput("brief_title_kw", "Brief title keywords"),
         selectInput('spons_sub', 'Type of Sponsor', 
                     c('All Sponsors', all_sponsors), selected = 'All Sponsors'
+        ),
+        downloadButton("download", "Download CSV")
+      )
+  )
+}
+
+data_sidediv <- function() {
+  div(id = 'data_id', 
+      conditionalPanel(
+        "input.sidebar === 'report_tab'",
+        selectizeInput(
+          'features', 'Select Features', choices = NAMES, multiple = TRUE
         )
       )
   )
@@ -310,7 +368,7 @@ loading_func <- function(){
 main_wait_msg <- function() {
   div(id = 'main_wait_message', 
       h1('Note, initial load may take up to 10 seconds.', 
-         style = "color:darkblue" , align = "center"), tags$hr())
+         style = "color:black" , align = "center"), tags$hr())
 }
 
 
@@ -402,25 +460,25 @@ body_styles <- function() {
     tags$style(HTML(".fa-share-alt { font-size: 20px; }")),
     tags$style(HTML(".tab-content { padding-left:
                     20px; padding-right: 30px; }")) ,
-
+    
     ## Modify Dashboard skin color
     tags$style(HTML('
                        /* logo */
                        .skin-blue .main-header .logo {
-                       background-color: #006272;
+                       background-color: #00356b;
                        }
                        /* logo when hovered */
                        .skin-blue .main-header .logo:hover {
-                       background-color: #006272;
+                       background-color: #00356b;
                        }
                        /* navbar (rest of the header) */
                        .skin-blue .main-header .navbar {
-                       background-color: #006272;
+                       background-color: #00356b;
                        }
                        /* active selected tab in the sidebarmenu */
                        .skin-blue .main-sidebar .sidebar 
                        .sidebar-menu .active a{
-                       background-color: #006272;
+                       background-color: #00356b;
                                  }
                        ')
     ),
@@ -456,5 +514,18 @@ body_styles <- function() {
   )
 }
 
+#' @description empty theme for plots, removes background, tixks and axis
+blankTheme <- function(){
+  theme_bw() + 
+    theme(panel.border = element_blank(), 
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(), 
+          axis.ticks.y = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.text.x = element_blank(),
+          axis.title.x=element_blank(),
+          axis.title.y=element_blank())
+}
 
 
