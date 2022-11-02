@@ -17,20 +17,17 @@
 ################################################################################
 ############################ Libraries #########################################
 
-library(dplyr)
-library(duckdb)
-library(dplyr)
 library(DBI)
 library(DT)
+library(dplyr)
+library(duckdb)
 library(ggplot2)
-library(tidyr)
-library(purrr)
 library(lubridate)
-library(wordcloud)
 library(mapproj)
+library(purrr)
 library(shinydashboard)
 library(tidyr)
-library(DT)
+library(wordcloud)
 
 ################################################################################
 ############################ Connection to DB ##################################
@@ -68,15 +65,19 @@ if (!exists("con")) {
 
 ################################################################################
 ############################ Variables #########################################
-# Get number of rows
+
+## CONSTANTS ##
+
+# number of rows
 N <- nrow(collect(dt))
 
-# Get number of columns
+# number of columns
 R <- ncol(dt)
 
+# column names
 NAMES <- colnames(dt)
 
-
+# min/max date for dateRangeInput (see utils.R)
 minDate <- dbGetQuery(con, "SELECT MIN(study_first_submitted_date) FROM studies")[[1]]
 maxDate <- dbGetQuery(con, "SELECT MAX(study_first_submitted_date) FROM studies")[[1]]
 

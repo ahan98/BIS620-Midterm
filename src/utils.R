@@ -331,7 +331,7 @@ report_sidediv <- function() {
         selectInput('spons_sub', 'Type of Sponsor', 
                     c('All Sponsors', all_sponsors), selected = 'All Sponsors'
         ),
-        dateRangeInput('dateRange',
+        dateRangeInput('date',
                        label = 'Date of First Submission',
                        start = minDate, end = maxDate,
                        min = minDate, max = maxDate

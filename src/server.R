@@ -4,8 +4,6 @@ source('~/Desktop/ctquery8/utils.R', local = TRUE) # For Alex
 source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
 
 rv <- reactiveValues()
-# rv$minDate <- dt %>% pull(start_date) %>% na.omit() %>% min()
-# rv$maxDate <- dt %>% pull(completion_date) %>% na.omit() %>% max()
 rv$si <- NULL
 rv$currentPlotData <- NULL
 
@@ -77,15 +75,11 @@ server <- function(input, output) {
       ret = data2
     }
     
-    # rv$minDate <- ret %>% pull(start_date) %>% na.omit() %>% min()
-    # rv$maxDate <- ret %>% pull(completion_date) %>% na.omit() %>% max()
-    # print(paste(rv$minDate, rv$maxDate))
-    
     # Final data
-    # print(colnames(ret))
     ret |>
       collect() |>
-      subset(input$dateRange[1] <= start_date & start_date <= input$dateRange[2])
+      subset(input$date[1] <= study_first_submitted_date
+             & study_first_submitted_date <= input$date[2])
   })
   
   get_studies_table = reactive({
