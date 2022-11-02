@@ -1,7 +1,7 @@
-# source('utils.R', local = TRUE) # For Elisa
-# source('vars.R', local = TRUE) # For Elisa
-source('~/Desktop/ctquery8/utils.R', local = TRUE) # For Alex
-source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
+source('utils.R', local = TRUE) # For Elisa
+source('vars.R', local = TRUE) # For Elisa
+# source('~/Desktop/ctquery8/utils.R', local = TRUE) # For Alex
+# source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
 
 # Stores values which update based on user query
 rv <- reactiveValues()
@@ -40,6 +40,19 @@ server <- function(input, output) {
       head(10) |>
       rename(`Country` = name, `Count` = n) 
   })
+  
+  output$word_static <- renderGirafe({
+    girafe(ggobj = briefPlot, 
+           options = list(opts_selection(type = "single")) 
+           )
+  })
+  
+  output$top_words_table = renderDataTable({
+    wordsDF |> 
+      rename(`Words` = words, `Count` = n) 
+  })
+  
+  
   
   ## Home Page has loaded
   removeUI(selector = '#main_wait_message' )
@@ -172,6 +185,7 @@ server <- function(input, output) {
                            `Country` = name), 
                   options = list(scrollX = TRUE))
   })
+
   
   # Data table with updated names
   observeEvent(rv$currentPlotData,{

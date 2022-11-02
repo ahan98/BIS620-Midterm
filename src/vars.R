@@ -27,18 +27,19 @@ library(purrr)
 library(shinydashboard)
 library(tidyr)
 library(wordcloud)
+library(stopwords)
+library(packcircles)
+library(ggiraph)
 
 ################################################################################
 ############################ Connection to DB ##################################
 # Create the connection to a database and "studies" and "sponsors" tables.
 if (!exists("con")) {
-  setwd("~")  # For Alex
   # Creating Connection
   con = dbConnect(
     duckdb(
-      # file.path("..", "..", "ctrialsgovdb", "ctrialsgov.duckdb"),  # For Nokkvi
-      # file.path(getwd(), "ctrialsgovdb", "ctrialsgov.duckdb"), # For Elisa
-      file.path(getwd(), "Desktop", "clinical-trials", "ctrialsgov.duckdb"),
+      #file.path("..", "..", "ctrialsgovdb", "ctrialsgov.duckdb"),  # For Nokkvi
+      file.path(getwd(), "ctrialsgovdb", "ctrialsgov.duckdb"),
       read_only = TRUE
     )
   )
@@ -95,19 +96,56 @@ all_sponsors <- dt |>
   mutate(agency_class = replace(agency_class, is.na(agency_class), 'NA')) |>
   arrange(agency_class)
 
+################################################################################
+############################ Word Variables ####################################
+
 # list of tokens (space-separated) in brief_title column
 # due to complexity, tokenize 1000 random rows instead of all data
-word_list <- dt |>
+filtered_list <- dt |>
   select(brief_title) |>
   collect() |>
   drop_na() |>
-  sample_n(1000, replace = FALSE) |> # takes ~30 secs on all rows
+  # sample_n(1000, replace = FALSE) |> # takes ~30 secs on all rows
   lapply(function(x) strsplit(x, split = "[ ,()\"\n]+")) |>
-  unlist() |>
-  unique()
+  unlist() 
+  
+word_list <- filtered_list |> unique()
 
 # lowercase tokens (see closest_word() function in utils.R)
 word_list_lc <- tolower(word_list)
+
+################################################################################
+######################### Bubble Plot Variables ################################
+
+# Lowercase words and create a dataframe
+words <- tolower(filtered_list)
+words <- trimws(words)
+wordsTemp <- as.data.frame(words)
+
+# Filter out stop words, keep non-numeric values only, grab top 50
+wordsDF <- wordsTemp %>% 
+  group_by(words) %>% 
+  summarize(n = n()) %>%  
+  filter(!(words %in% stopwords(source = "snowball"))) %>%
+  filter(!grepl("[^A-Za-z]", words)) %>% 
+  filter(words != "") %>% 
+  arrange(desc(n)) %>% 
+  head(50)
+
+# Create radii for plots
+packing <- circleProgressiveLayout(wordsDF$n, sizetype='area')
+packing$radius <- 0.95*packing$radius
+data <- cbind(wordsDF, packing)
+dat.gg <- circleLayoutVertices(packing, npoints=50)
+
+# Create and save plot
+briefPlot <- ggplot() + 
+  geom_polygon(data = dat.gg, aes(x, y, group = id, fill=id), 
+               colour = "black", alpha = 0.6) +
+  geom_text(data = data, aes(x, y, size=n, label = words), color="black") +
+  theme_void() + 
+  theme(legend.position="none")+ 
+  coord_equal()
 
 ################################################################################
 ######################## World map data wrangling ##############################
@@ -193,6 +231,11 @@ are registered within each country."
 home_map <- "As can be seen from the map, most of the studies are done in
 the USA. The top ten countries are documented below."
 
+home_word <- "Below is a bubble plot showing the top 50 most used words in the
+brief titles of our database. Words like study and patients are not surprisingly
+the most commonly used words. Other words like breast, lung, or cancer shows 
+that the database contains many studies on breast cancer and lung cancer."
+
 ################################################################################
 ############################ The explore page ##################################
 
@@ -227,10 +270,9 @@ about_alex <- 'Alex Han is from Los Angeles, California. He is known around his
 neighborhood for walking his cat twice a day. His favorite activites include
 watching movies and thrift shopping.'
 
-about_elisa <- 'Elisa Loy owns a pet snail, loves dnd do stats but hates it and 
-loves math theory which is very weird… and a secret that no-one knows is that 
-she actually just wants to be in a thrupple with a man who has money and a girl 
-who bakes'
+about_elisa <- 'Elisa Loy is from Massachusetts. In her spare time, she likes to
+ski and run. She also likes to make things like live edge desks or otomi.'
+
 about_nokkvi <- 'Nokkvi Ellidason is Icelandic and loves working in R.
 In his spare time he does sports analytical research and works out. Favorite
 ice cream has to be the original Icelandic ice cream.'

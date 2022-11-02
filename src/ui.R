@@ -1,7 +1,7 @@
-# source('vars.R', local = TRUE) # For Elisa
-# source('utils.R', local = TRUE) # For Elisa
-source('~/Desktop/ctquery8/utils.R', local = TRUE) # For Alex
-source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
+source('vars.R', local = TRUE) # For Elisa
+source('utils.R', local = TRUE) # For Elisa
+#source('~/Desktop/ctquery8/utils.R', local = TRUE) # For Alex
+#source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
 library(shinydashboard) # For Elisa
 
 # 1. Header --------------------------------------------------------------------
@@ -55,7 +55,10 @@ body <- dashboardBody(
             plotOutput("world_static"),
             # Data table with top 10 NCT_ID in countries
             p(home_map),
-            dataTableOutput("top_countries_table")
+            dataTableOutput("top_countries_table"),
+            p(home_word),
+            girafeOutput("word_static"),
+            dataTableOutput("top_words_table")
 
     ),
     

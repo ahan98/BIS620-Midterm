@@ -1,7 +1,7 @@
 # This script holds utilities used for the shiny app. All utilities are created
 # here except for variables.
 
-source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
+#source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
 
 #' @title Query keywords from a database table.
 #' @description Description goes here.
@@ -109,6 +109,8 @@ get_concurrent_trials = function(d) {
   within_date = function(date, starts, ends) {
     date >= starts & date <= ends
   }
+  
+  rv$currentPlotData <- NULL
   
   # Get the number of concurrent trials at each of the unique dates.
   all_dates$count = 
@@ -345,7 +347,7 @@ data_sidediv <- function() {
   div(id = 'data_id', 
       conditionalPanel(
         "input.sidebar === 'data_tab'",
-        downloadButton("download", "Download CSV"),
+        actionButton("download", 'Show and Download Data', icon = icon('sync')),
         selectizeInput(
           'features', 'Features', choices = NAMES, multiple = TRUE
         )
