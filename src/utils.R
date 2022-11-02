@@ -330,8 +330,7 @@ report_sidediv <- function() {
         textInput("brief_title_kw", "Brief title keywords"),
         selectInput('spons_sub', 'Type of Sponsor', 
                     c('All Sponsors', all_sponsors), selected = 'All Sponsors'
-        ),
-        downloadButton("download", "Download CSV")
+        )
       )
   )
 }
@@ -339,9 +338,10 @@ report_sidediv <- function() {
 data_sidediv <- function() {
   div(id = 'data_id', 
       conditionalPanel(
-        "input.sidebar === 'report_tab'",
+        "input.sidebar === 'data_tab'",
+        downloadButton("download", "Download CSV"),
         selectizeInput(
-          'features', 'Select Features', choices = NAMES, multiple = TRUE
+          'features', 'Features', choices = NAMES, multiple = TRUE
         )
       )
   )

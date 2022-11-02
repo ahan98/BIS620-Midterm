@@ -210,6 +210,13 @@ title query or sponsor is selected, the first 1000 rows of the full data set is
 shown."
 
 ################################################################################
+############################ The download page ##################################
+
+download_instructions <- "After subsetting the data from the Explore page,
+select the features of interest, then click the \"Download\" button to export
+the data in .csv format."
+
+################################################################################
 ############################ The about page ####################################
 
 logo_sds <- "https://statistics.yale.edu/sites/default/files/

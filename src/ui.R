@@ -21,12 +21,14 @@ sidebar_main <-
     sidebarMenu(
       id = 'sidebar', style = "position: relative; overflow: visible;",
       ## 1st tab: Home Page
-      menuItem("Home page", tabName = 'dashboard_tab', icon = icon('globe')),
+      menuItem("Home", tabName = 'dashboard_tab', icon = icon('globe')),
       ## 2nd tab: Data Explore
       menuItem("Data Explore", tabName = 'report_tab', icon = icon('wrench')),
       report_sidediv(),
+      ## 3rd tab: Download
+      menuItem("Download", tabName = 'data_tab', icon = icon('dashboard')),
       data_sidediv(),
-      ## 3rd tab: About
+      ## 4th tab: About
       menuItem("About", tabName = 'help', icon = icon('question-circle'))
     )
   )
@@ -86,15 +88,21 @@ body <- dashboardBody(
             tags$hr(),
             tabsetPanel(type = "tabs",
                         tabPanel("View Subset Data", DTOutput("trial_table")),
-                        tabPanel("View Summarized Data", DTOutput("summary_table")),
-                        tabPanel("View Subset Features", DTOutput("features_table"))
+                        tabPanel("View Summarized Data", DTOutput("summary_table"))
             )
     ),
     
-    # tabItem(tabName = 'download_tab',
-    # ),
+    # Page 3, Download ---------------------------------------------------------
+    tabItem(tabName = 'data_tab',
+            # main_wait_msg(),                # Main Wait Message!
+            # htmlOutput("aact"),
+            h4('Download Instructions'),
+            # p(download_instructions),
+            tags$hr(),
+            DTOutput("features_table")
+    ), 
     
-    # Page 3, About ------------------------------------------------------------
+    # Page 4, About ------------------------------------------------------------
     tabItem(tabName = 'help',
             # Logo
             htmlOutput("sds"),
@@ -134,4 +142,3 @@ body <- dashboardBody(
 
 # Make UI
 ui <- dashboardPage(header, sidebar_main, body)
-

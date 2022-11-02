@@ -186,12 +186,18 @@ server <- function(input, output) {
   ## Data Explore Page has loaded
   removeUI(selector = '#main_wait_message' )
   
+  ##############################################################################
+  # Download Page --------------------------------------------------------------
+  
   output$download <- downloadHandler(
     filename = function(){"studies.csv"}, 
     content = function(fname){
       write.csv(get_studies(), fname)
     }
   )
+  
+  ## Data Explore Page has loaded
+  # removeUI(selector = '#main_wait_message' )
 
   ##############################################################################
   # About Page -----------------------------------------------------------------
