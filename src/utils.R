@@ -330,6 +330,11 @@ report_sidediv <- function() {
         textInput("brief_title_kw", "Brief title keywords"),
         selectInput('spons_sub', 'Type of Sponsor', 
                     c('All Sponsors', all_sponsors), selected = 'All Sponsors'
+        ),
+        dateRangeInput('dateRange',
+                       label = 'Date of First Submission',
+                       start = minDate, end = maxDate,
+                       min = minDate, max = maxDate
         )
       )
   )

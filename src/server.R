@@ -4,10 +4,10 @@ source('~/Desktop/ctquery8/utils.R', local = TRUE) # For Alex
 source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
 
 rv <- reactiveValues()
+# rv$minDate <- dt %>% pull(start_date) %>% na.omit() %>% min()
+# rv$maxDate <- dt %>% pull(completion_date) %>% na.omit() %>% max()
 rv$si <- NULL
 rv$currentPlotData <- NULL
-rv$minDate <- NULL
-rv$maxDate <- NULL
 
 # Define server
 server <- function(input, output) {
@@ -82,8 +82,10 @@ server <- function(input, output) {
     # print(paste(rv$minDate, rv$maxDate))
     
     # Final data
+    # print(colnames(ret))
     ret |>
-      collect()
+      collect() |>
+      subset(input$dateRange[1] <= start_date & start_date <= input$dateRange[2])
   })
   
   get_studies_table = reactive({
@@ -124,7 +126,7 @@ server <- function(input, output) {
   
   output$features_table <- renderDT({
     DT::datatable(
-      get_studies() |> select(input$features) |> head(1000)
+      get_studies() |> select(input$features) |> head(max_num_studies)
     )
   })
   

@@ -97,7 +97,7 @@ body <- dashboardBody(
             # main_wait_msg(),                # Main Wait Message!
             # htmlOutput("aact"),
             h4('Download Instructions'),
-            # p(download_instructions),
+            p(download_instructions),
             tags$hr(),
             DTOutput("features_table")
     ), 

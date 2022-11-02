@@ -76,11 +76,15 @@ R <- ncol(dt)
 
 NAMES <- colnames(dt)
 
+
+minDate <- dbGetQuery(con, "SELECT MIN(study_first_submitted_date) FROM studies")[[1]]
+maxDate <- dbGetQuery(con, "SELECT MAX(study_first_submitted_date) FROM studies")[[1]]
+
 # All phases in the complete data frame
 all_phases <- dt |>
   select(phase) |>
   distinct() |>
-  collect() 
+  collect()
 
 # Max number of studies shown in data table
 max_num_studies <-  1000
