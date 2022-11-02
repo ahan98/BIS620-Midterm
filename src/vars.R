@@ -13,7 +13,6 @@
 ### Data Explore page
 ### About page
 
-
 ################################################################################
 ############################ Libraries #########################################
 
@@ -66,8 +65,6 @@ if (!exists("con")) {
 ################################################################################
 ############################ Variables #########################################
 
-## CONSTANTS ##
-
 # number of rows
 N <- nrow(collect(dt))
 
@@ -78,17 +75,17 @@ R <- ncol(dt)
 NAMES <- colnames(dt)
 
 # min/max date for dateRangeInput (see utils.R)
-minDate <- dbGetQuery(con, "SELECT MIN(study_first_submitted_date) FROM studies")[[1]]
-maxDate <- dbGetQuery(con, "SELECT MAX(study_first_submitted_date) FROM studies")[[1]]
+MIN_DATE <- dbGetQuery(con, "SELECT MIN(study_first_submitted_date) FROM studies")[[1]]
+MAX_DATE <- dbGetQuery(con, "SELECT MAX(study_first_submitted_date) FROM studies")[[1]]
+
+# Max number of studies shown in data table
+MAX_STUDIES <-  1000
 
 # All phases in the complete data frame
 all_phases <- dt |>
   select(phase) |>
   distinct() |>
   collect()
-
-# Max number of studies shown in data table
-max_num_studies <-  1000
 
 # All sponsors in complete data frame
 all_sponsors <- dt |> 
@@ -104,7 +101,6 @@ word_list <- dt |>
   select(brief_title) |>
   collect() |>
   drop_na() |>
-  # head(5) |>
   sample_n(1000, replace = FALSE) |> # takes ~30 secs on all rows
   lapply(function(x) strsplit(x, split = "[ ,()\"\n]+")) |>
   unlist() |>

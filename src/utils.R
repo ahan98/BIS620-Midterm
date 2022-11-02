@@ -1,4 +1,4 @@
-# This script hold utilities used for the shiny app. All utilities are created
+# This script holds utilities used for the shiny app. All utilities are created
 # here except for variables.
 
 source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
@@ -12,6 +12,7 @@ source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
 #' (default TRUE)
 #' @param match_all should we look for values that match all of the keywords 
 #' (intersection) or any of the keywords (union)? (default FALSE; union).
+#' @returns 
 
 query_kwds <- function(d, kwds, column, ignore_case = TRUE, match_all = FALSE) {
   # Keyword can't be empty
@@ -333,8 +334,8 @@ report_sidediv <- function() {
         ),
         dateRangeInput('date',
                        label = 'Date of First Submission',
-                       start = minDate, end = maxDate,
-                       min = minDate, max = maxDate
+                       start = MIN_DATE, end = MAX_DATE,
+                       min = MIN_DATE, max = MAX_DATE
         )
       )
   )

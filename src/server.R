@@ -3,6 +3,7 @@
 source('~/Desktop/ctquery8/utils.R', local = TRUE) # For Alex
 source('~/Desktop/ctquery8/vars.R', local = TRUE) # For Alex
 
+# Stores values which update based on user query
 rv <- reactiveValues()
 rv$si <- NULL
 rv$currentPlotData <- NULL
@@ -75,7 +76,7 @@ server <- function(input, output) {
       ret = data2
     }
     
-    # Final data
+    # Finally, subset data based on date range
     ret |>
       collect() |>
       subset(input$date[1] <= study_first_submitted_date
@@ -86,7 +87,7 @@ server <- function(input, output) {
     loading_func()
     # Max Num Shown subseting for table 
     get_studies() |>
-      head(max_num_studies) |>
+      head(MAX_STUDIES) |>
       collect()
   })
   
@@ -95,7 +96,7 @@ server <- function(input, output) {
   observe({
     loading_func()
     
-    # Value box for number of rows in subset before max_num_studies subsetting
+    # Value box for number of rows in subset before MAX_STUDIES subsetting
     subset <- nrow(get_studies() %>% collect())
     output$Box12 <- vb_render(subset, 'import', 'Entries in Subset & Plots', '', 'blue')
     
@@ -120,7 +121,7 @@ server <- function(input, output) {
   
   output$features_table <- renderDT({
     DT::datatable(
-      get_studies() |> select(input$features) |> head(max_num_studies)
+      get_studies() |> select(input$features) |> head(MAX_STUDIES)
     )
   })
   
