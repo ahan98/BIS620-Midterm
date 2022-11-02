@@ -223,7 +223,10 @@ the data in .csv format."
 logo_sds <- "https://statistics.yale.edu/sites/default/files/
 styles/user_picture_node/public/sized_vertical_sds_0.png?itok=7U3MjIrh"
 
-about_alex <- 'Alex Han loves Greenwich.'
+about_alex <- 'Alex Han is from Los Angeles, California. He is known around his
+neighborhood for walking his cat twice a day. His favorite activites include
+watching movies and thrift shopping.'
+
 about_elisa <- 'Elisa Loy owns a pet snail, loves dnd do stats but hates it and 
 loves math theory which is very weird… and a secret that no-one knows is that 
 she actually just wants to be in a thrupple with a man who has money and a girl 
